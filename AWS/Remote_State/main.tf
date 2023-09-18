@@ -1,4 +1,5 @@
 terraform {
+   # Execute the script without this Backend block to create S3 Bucket first, Then add this block & run again. 
    backend "s3" {
      bucket         = "286201236151-terraform-states"
      key            = "Terraform/aws/remote-state/terraform.tfstate"
