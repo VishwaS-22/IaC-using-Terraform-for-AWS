@@ -1,10 +1,11 @@
 terraform {
    # Execute the script without this Backend block to create S3 Bucket first, Then add this block & run again. 
    backend "s3" {
-     bucket         = "286201236151-terraform-states"
-     key            = "Terraform/aws/remote-state/terraform.tfstate"
+     bucket         = "<account_id>-terraform-states"
+     key            = "Remote_Backend/terraform.tfstate"
      region         = "us-east-1"
      encrypt        = true
+     dynamodb_table = "terraform-lock"
   }
 
   required_providers {
@@ -27,6 +28,7 @@ locals {
   account_id    = data.aws_caller_identity.current.account_id
 }
 
+# Create S3 Bucket.
 resource "aws_s3_bucket" "terraform_state" {
   # With account id, this S3 bucket names can be *globally* unique.
   
@@ -46,5 +48,17 @@ resource "aws_s3_bucket" "terraform_state" {
         sse_algorithm = "AES256"
       }
     }
+  }
+}
+
+# Create DynamoDB.
+resource "aws_dynamodb_table" "terraform_lock" {
+  name         = "terraform-lock"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "LockID"
+
+  attribute {
+    name = "LockID"
+    type = "S"
   }
 }
